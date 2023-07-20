@@ -1,0 +1,2099 @@
+[
+    {
+        "id": "a10dbe8bb2c3f71f",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "15441c4256a0d1ab",
+        "type": "mqtt in",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "topic": "ESP32Weather/weather_sensors",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "1d8803cbe9a53e9d",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 290,
+        "y": 680,
+        "wires": [
+            [
+                "123686c2d9423993",
+                "4439ec661ff3bf39"
+            ]
+        ]
+    },
+    {
+        "id": "123686c2d9423993",
+        "type": "change",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\t    \"temperature\": msg.payload.t,\t    \"pressure\": msg.payload.p,\t    \"humidity\": msg.payload.h,\t    \"altitude\": msg.payload.a,\t    \"wind\": msg.payload.w,\t    \"rain\": msg.payload.r\t}",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 560,
+        "y": 740,
+        "wires": [
+            [
+                "838bf7a3b2bae74a",
+                "86dbdaa359c82b9d",
+                "67d7c1248028d35e"
+            ]
+        ]
+    },
+    {
+        "id": "838bf7a3b2bae74a",
+        "type": "trigger",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "op1": "",
+        "op2": "{\"type\":\"message\",\"chatId\":\"193175889\",\"content\":\"Weather sensor node timed out\"}",
+        "op1type": "nul",
+        "op2type": "json",
+        "duration": "1",
+        "extend": true,
+        "overrideDelay": false,
+        "units": "min",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 770,
+        "y": 740,
+        "wires": [
+            [
+                "b36ec363cfcdb543"
+            ]
+        ]
+    },
+    {
+        "id": "518ef2a5a71563c5",
+        "type": "function",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "function 1",
+        "func": "var opts = {\n    reply_markup: JSON.stringify({\n        \"inline_keyboard\": [[\n            // {\n            //     \"text\": \"Temperature\",\n            //     \"callback_data\": \"1\"\n            // },\n            // {\n            //     \"text\": \"Humidity\",\n            //     \"callback_data\": \"2\"\n            // },\n            {\n                \"text\": \"Weather\",\n                \"callback_data\": \"1\"\n            },\n            {\n                \"text\": \"Soil\",\n                \"callback_data\": \"2\"\n            }\n            // {\n            //     \"text\": \"Pressure\",\n            //     \"callback_data\": \"3\"\n            // },\n            // {\n            //     \"text\": \"Altitude\",\n            //     \"callback_data\": \"4\"\n            // },\n            // {\n            //     \"text\": \"Wind\",\n            //     \"callback_data\": \"5\"\n            // }, \n            // {\n            //     \"text\": \"Rain\",\n            //     \"callback_data\": \"6\"\n            // }\n            ]\n        ]\n    })\n};\n\nmsg.error = false;\n\nmsg.payload.content = 'Selection?';\nmsg.payload.options = opts;\nmsg.payload.chatId = msg.payload.chatId;\nmsg.payload.type = \"message\";\n\nreturn [msg];",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 920,
+        "wires": [
+            [
+                "e180e1023dc07172"
+            ]
+        ]
+    },
+    {
+        "id": "6820681dac9ca0a6",
+        "type": "function",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "function 2",
+        "func": "msg.callback = msg.payload;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 1100,
+        "wires": [
+            [
+                "d1911b55b44db796",
+                "a660256c14d50df1"
+            ]
+        ]
+    },
+    {
+        "id": "4fd4de8b55881da9",
+        "type": "function",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "function 3",
+        "func": "var data;\nif (msg.callback.content == 1) {\n    // msg.payload.content = msg.payload.results[0].series[0].values[0][5] + \" °C\";\n    var temp = msg.payload.results[0].series[0].values[0][5];\n    var humd = msg.payload.results[0].series[0].values[0][2];\n    var pres = msg.payload.results[0].series[0].values[0][3];\n    var alt = msg.payload.results[0].series[0].values[0][1];\n    var wind = msg.payload.results[0].series[0].values[0][6];\n    var rain = msg.payload.results[0].series[0].values[0][4];\n    var rainVal = (rain === 1) ? \"no rain\" : \"rain\";\n    data = \"Temperature: \" + temp.toFixed(2) + \" °C\\n\"\n        + \"Humidity: \" + humd.toFixed(2) + \" %\\n\"\n        + \"Pressure: \" + pres.toFixed(2) + \" kPa\\n\"\n        + \"Altitude: \" + alt.toFixed(2) + \" m\\n\"\n        + \"Wind: \" + wind.toFixed(2) + \" m/s\\n\"\n     + \"Rain: \" + rainVal;\n\n}\nmsg.error = false;\nmsg.payload.content = data;\nmsg.payload.chatId = msg.callback.chatId;\nmsg.payload.type = \"message\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 920,
+        "y": 1060,
+        "wires": [
+            [
+                "a18237c9fda6db01"
+            ]
+        ]
+    },
+    {
+        "id": "ba41bb546a153d93",
+        "type": "function",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "Alert logic",
+        "func": "var wind_speed = msg.payload;\nvar alert_flag = context.get(\"alert_flag\");\nif (typeof alert_flag == \"undefined\")\n    alert_flag = false;\nif (wind_speed > 20.00 && !alert_flag) {\n    alert_flag = true;\n    msg.alert = 1;\n    context.set(\"alert_flag\", alert_flag);\n    return msg;\n}\nif (wind_speed <= 12.00 && alert_flag) {\n    alert_flag = false;\n    msg.alert = 0;\n    context.set(\"alert_flag\", alert_flag);\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 480,
+        "wires": [
+            [
+                "13bd62bbe0fc7797"
+            ]
+        ]
+    },
+    {
+        "id": "13bd62bbe0fc7797",
+        "type": "function",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "function 5",
+        "func": "var temp = msg.payload;\nmsg.to = \"funstudy10@gmail.com\";\nvar d = new Date();\nvar message = \"\";\nif (msg.alarm) {\n    msg.topic = \"High Wind Alert!\";\n    message = \" \";\n}\nelse {\n    message = \" Wind speed is back to normal now. The current wind speed is \" + temp; \n    msg.topic = \"Wind Alarm Reset.\";\n}\nmsg.payload = \"time:\" + d + message + msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 480,
+        "wires": [
+            [
+                "41bea88ba02ae1b3"
+            ]
+        ]
+    },
+    {
+        "id": "4439ec661ff3bf39",
+        "type": "function",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "function 6",
+        "func": "let x = msg.payload;\n\nlet tag1 = { payload: x.t.toFixed(2) };\nlet tag2 = { payload: x.p.toFixed(2) };\nlet tag3 = { payload: x.h.toFixed(2) };\nlet tag4 = { payload: x.a.toFixed(2) };\nlet tag5 = { payload: x.w.toFixed(2) };\nlet tag6 = { payload: x.r };\n\n\nreturn [tag1, tag2, tag3, tag4, tag5, tag6];",
+        "outputs": 6,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 660,
+        "wires": [
+            [
+                "b2d62b7bf493265e",
+                "65138e05b9e03f00",
+                "82867cc1156627ec"
+            ],
+            [
+                "db38de122918d73a"
+            ],
+            [
+                "4687f42b4b81e406",
+                "fa48ca1a5032f951"
+            ],
+            [
+                "6a95acd86934f7ad"
+            ],
+            [
+                "389c7c9ae5991242",
+                "ba41bb546a153d93",
+                "c595836a6c6dd94c"
+            ],
+            [
+                "2903d49ac22958fa"
+            ]
+        ]
+    },
+    {
+        "id": "2903d49ac22958fa",
+        "type": "function",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "function 7",
+        "func": "let r = msg.payload;\n\nif (r === 0) {\n    msg.payload = 'rain'\n} else {\n    msg.payload = 'not raining'\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 620,
+        "wires": [
+            [
+                "584d77d9ef202fa7"
+            ]
+        ]
+    },
+    {
+        "id": "4687f42b4b81e406",
+        "type": "ui_gauge",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "9a0e0b4e3377d54d",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "gtype": "donut",
+        "title": "Humidity",
+        "label": "%",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "70",
+        "seg2": "80",
+        "diff": false,
+        "className": "",
+        "x": 540,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "6a95acd86934f7ad",
+        "type": "ui_gauge",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "9a0e0b4e3377d54d",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "gtype": "compass",
+        "title": "Altitude",
+        "label": "meters",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "300",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 540,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "65138e05b9e03f00",
+        "type": "ui_gauge",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "a30964689d06a627",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "gtype": "gage",
+        "title": "Temperature (in C)",
+        "label": "C",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "50",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "30",
+        "seg2": "40",
+        "diff": false,
+        "className": "",
+        "x": 570,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "e14959e98d82e011",
+        "type": "ui_gauge",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "a30964689d06a627",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "gtype": "gage",
+        "title": "Temperature (in F)",
+        "label": "F",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "122",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 570,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "db38de122918d73a",
+        "type": "ui_text",
+        "z": "a10dbe8bb2c3f71f",
+        "group": "9a0e0b4e3377d54d",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Pressure",
+        "format": "{{msg.payload}} hPa",
+        "layout": "row-spread",
+        "className": "",
+        "x": 540,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "389c7c9ae5991242",
+        "type": "ui_text",
+        "z": "a10dbe8bb2c3f71f",
+        "group": "9a0e0b4e3377d54d",
+        "order": 5,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Wind Speed",
+        "format": "{{msg.payload}} m/s",
+        "layout": "row-spread",
+        "className": "",
+        "x": 550,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "584d77d9ef202fa7",
+        "type": "ui_text",
+        "z": "a10dbe8bb2c3f71f",
+        "group": "9a0e0b4e3377d54d",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Rain",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 890,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "c595836a6c6dd94c",
+        "type": "ui_chart",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "9bd9e1ba355eb927",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "Wind",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "60",
+        "removeOlder": "10",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#2177b5",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d72828",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 530,
+        "y": 560,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "86dbdaa359c82b9d",
+        "type": "influxdb out",
+        "z": "a10dbe8bb2c3f71f",
+        "influxdb": "f73d4a74b08d48e4",
+        "name": "",
+        "measurement": "weather_data",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 900,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "d1911b55b44db796",
+        "type": "influxdb in",
+        "z": "a10dbe8bb2c3f71f",
+        "influxdb": "f73d4a74b08d48e4",
+        "name": "",
+        "query": "select * from weather_data order by time desc limit 1",
+        "rawOutput": true,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "deno",
+        "x": 650,
+        "y": 1060,
+        "wires": [
+            [
+                "4fd4de8b55881da9"
+            ]
+        ]
+    },
+    {
+        "id": "247ad8876972394d",
+        "type": "e-mail",
+        "z": "a10dbe8bb2c3f71f",
+        "server": "smtp.gmail.com",
+        "port": "465",
+        "authtype": "BASIC",
+        "saslformat": false,
+        "token": "",
+        "secure": true,
+        "tls": true,
+        "name": "funstudy10@gmail.com",
+        "dname": "Email Alert",
+        "x": 910,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "750b71fbf8cf4d46",
+        "type": "telegram command",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "command": "/start",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "acd516fee320eb0b",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 210,
+        "y": 920,
+        "wires": [
+            [
+                "518ef2a5a71563c5",
+                "a897cbc202c4aaf0"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "d5726986ae4bbe23",
+        "type": "telegram event",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "bot": "acd516fee320eb0b",
+        "event": "callback_query",
+        "autoanswer": false,
+        "x": 180,
+        "y": 1100,
+        "wires": [
+            [
+                "6820681dac9ca0a6",
+                "24763b5d7fb806e6"
+            ]
+        ]
+    },
+    {
+        "id": "b36ec363cfcdb543",
+        "type": "telegram sender",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "bot": "acd516fee320eb0b",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 950,
+        "y": 740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e180e1023dc07172",
+        "type": "telegram sender",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "bot": "acd516fee320eb0b",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 580,
+        "y": 920,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a18237c9fda6db01",
+        "type": "telegram sender",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "bot": "acd516fee320eb0b",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1150,
+        "y": 1080,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bdcf3972672117a3",
+        "type": "comment",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "Weather Dashboard",
+        "info": "",
+        "x": 570,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "98ba3db285a8d688",
+        "type": "comment",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "Soil Dashboard",
+        "info": "",
+        "x": 1360,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "8d5561755fded22f",
+        "type": "ui_gauge",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "352aa6064683df41",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "gtype": "donut",
+        "title": "Humidity",
+        "label": "%",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "70",
+        "seg2": "80",
+        "diff": false,
+        "className": "",
+        "x": 1340,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "cd3168a082fd9709",
+        "type": "ui_gauge",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "Temperature",
+        "group": "352aa6064683df41",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "gtype": "gage",
+        "title": "Temperature",
+        "label": "C",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 1350,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "6f098d83b09795bf",
+        "type": "ui_gauge",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "Temperature",
+        "group": "f7abd1b39e1d4eb0",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "gtype": "gage",
+        "title": "Temperature",
+        "label": "C",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 1750,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "6cfd16124f92a03b",
+        "type": "ui_gauge",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "f7abd1b39e1d4eb0",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "gtype": "wave",
+        "title": "Moisture",
+        "label": "%",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 1740,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "dca1c6e2beccd7d0",
+        "type": "ui_text",
+        "z": "a10dbe8bb2c3f71f",
+        "group": "f7abd1b39e1d4eb0",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Ph",
+        "format": "{{msg.payload}} ",
+        "layout": "row-spread",
+        "className": "",
+        "x": 1730,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "99da44d830cb38c3",
+        "type": "ui_text",
+        "z": "a10dbe8bb2c3f71f",
+        "group": "f7abd1b39e1d4eb0",
+        "order": 4,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "EC",
+        "format": "{{msg.payload}} uS/cm",
+        "layout": "row-spread",
+        "className": "",
+        "x": 1730,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "3615cee4bf583db3",
+        "type": "ui_chart",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "53ca7c7ee9429335",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "Temperature",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "50",
+        "removeOlder": "15",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1750,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "eb0b4faca747694c",
+        "type": "ui_chart",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "53ca7c7ee9429335",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "Moisture",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": "15",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1740,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "27121a1a914fcdd0",
+        "type": "ui_text",
+        "z": "a10dbe8bb2c3f71f",
+        "group": "f7abd1b39e1d4eb0",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Nitrogen (N)",
+        "format": "{{msg.payload}} mg",
+        "layout": "row-spread",
+        "className": "",
+        "x": 1750,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "ca08a84b958b763a",
+        "type": "ui_chart",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "53ca7c7ee9429335",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "label": "Fertilizer (NPK)",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "",
+        "removeOlder": "15",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1760,
+        "y": 700,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "547a78df027a37ed",
+        "type": "ui_chart",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "53ca7c7ee9429335",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "label": "EC",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "",
+        "removeOlder": "15",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1730,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "610aeebac52d4660",
+        "type": "ui_chart",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "53ca7c7ee9429335",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Ph",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "14",
+        "removeOlder": "15",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1730,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a7c5719a18b5ebd0",
+        "type": "ui_text",
+        "z": "a10dbe8bb2c3f71f",
+        "group": "f7abd1b39e1d4eb0",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Phosphorus (P)",
+        "format": "{{msg.payload}} mg",
+        "layout": "row-spread",
+        "className": "",
+        "x": 1760,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "0a1c73ae323be360",
+        "type": "ui_text",
+        "z": "a10dbe8bb2c3f71f",
+        "group": "f7abd1b39e1d4eb0",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Potassium (K)",
+        "format": "{{msg.payload}} mg",
+        "layout": "row-spread",
+        "className": "",
+        "x": 1760,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "75ee37290a74d210",
+        "type": "ui_chart",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "d0c919956a6745b6",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "Temperature",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "15",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1350,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4880b7bc39fb15b9",
+        "type": "ui_chart",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "d0c919956a6745b6",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "Humidity",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "15",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1340,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "787f49c4d2d05d2a",
+        "type": "ui_text",
+        "z": "a10dbe8bb2c3f71f",
+        "group": "352aa6064683df41",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Light Intensity",
+        "format": "{{msg.payload}} lx",
+        "layout": "row-spread",
+        "className": "",
+        "x": 1360,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "67d7c1248028d35e",
+        "type": "influxdb out",
+        "z": "a10dbe8bb2c3f71f",
+        "influxdb": "3e75912bc0b60661",
+        "name": "",
+        "measurement": "weather-data",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "deno",
+        "bucket": "nodered",
+        "x": 830,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "b2d62b7bf493265e",
+        "type": "ui_chart",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "9bd9e1ba355eb927",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "Temperature",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "",
+        "removeOlder": "10",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 550,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fa48ca1a5032f951",
+        "type": "ui_chart",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "9bd9e1ba355eb927",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Humidity",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "",
+        "removeOlder": "10",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 540,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "82867cc1156627ec",
+        "type": "function",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "function 8",
+        "func": "var cTemp = msg.payload;\nvar cToFahr = cTemp * 9 / 5 + 32;\nmsg.payload = cToFahr.toFixed(2)\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 380,
+        "wires": [
+            [
+                "e14959e98d82e011"
+            ]
+        ]
+    },
+    {
+        "id": "8a9fd2c8dadac7aa",
+        "type": "mqtt in",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "topic": "ESP32Soil/soil_sensors",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "1d8803cbe9a53e9d",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 1140,
+        "y": 620,
+        "wires": [
+            [
+                "5e7bb3d90c5a380a",
+                "35120de6506b15c6"
+            ]
+        ]
+    },
+    {
+        "id": "5e7bb3d90c5a380a",
+        "type": "function",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "function 9",
+        "func": "let x = msg.payload;\n\nlet tag1 = { payload: x.lx.toFixed(2) };\nlet tag2 = { payload: x.tv.toFixed(2) };\nlet tag3 = { payload: x.h.toFixed(2) };\nlet tag4 = { payload: x.m.toFixed(2) };\nlet tag5 = { payload: x.t.toFixed(2) };\nlet tag6 = { payload: x.ec.toFixed(2) };\nlet tag7 = { payload: x.ph };\nlet tag8 = { payload: x.n.toFixed(2), topic: 'nitrogen' };\nlet tag9 = { payload: x.p.toFixed(2), topic: 'phosphorus' };\nlet tag10 = { payload: x.k.toFixed(2), topic: 'potassium' };\n\n\n\nreturn [tag1, tag2, tag3, tag4, tag5, tag6, tag7, tag8, tag9, tag10];",
+        "outputs": 10,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1360,
+        "y": 560,
+        "wires": [
+            [
+                "787f49c4d2d05d2a"
+            ],
+            [
+                "cd3168a082fd9709",
+                "75ee37290a74d210"
+            ],
+            [
+                "8d5561755fded22f",
+                "4880b7bc39fb15b9",
+                "e88f24a038bcfd6c"
+            ],
+            [
+                "6cfd16124f92a03b",
+                "eb0b4faca747694c",
+                "992e876c41541f18"
+            ],
+            [
+                "6f098d83b09795bf",
+                "3615cee4bf583db3"
+            ],
+            [
+                "99da44d830cb38c3",
+                "547a78df027a37ed"
+            ],
+            [
+                "dca1c6e2beccd7d0",
+                "610aeebac52d4660"
+            ],
+            [
+                "27121a1a914fcdd0",
+                "ca08a84b958b763a",
+                "bd3b63574ec756a8"
+            ],
+            [
+                "a7c5719a18b5ebd0",
+                "ca08a84b958b763a",
+                "bd3b63574ec756a8"
+            ],
+            [
+                "0a1c73ae323be360",
+                "ca08a84b958b763a",
+                "bd3b63574ec756a8"
+            ]
+        ]
+    },
+    {
+        "id": "d73222dc16bfed0c",
+        "type": "debug",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1360,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "4ab3146d7d235f2c",
+        "type": "trigger",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "op1": "",
+        "op2": "{\"type\":\"message\",\"chatId\":\"193175889\",\"content\":\"Soil sensor node timed out\"}",
+        "op1type": "nul",
+        "op2type": "json",
+        "duration": "1",
+        "extend": true,
+        "overrideDelay": false,
+        "units": "min",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 1370,
+        "y": 720,
+        "wires": [
+            [
+                "25aa206d0d9a9b1b"
+            ]
+        ]
+    },
+    {
+        "id": "25aa206d0d9a9b1b",
+        "type": "telegram sender",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "bot": "acd516fee320eb0b",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1550,
+        "y": 720,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "35120de6506b15c6",
+        "type": "change",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\t    \"lux\": msg.payload.lx,\t    \"tempv\": msg.payload.tv,\t    \"humidity\": msg.payload.h,\t    \"moisture\": msg.payload.m,\t    \"temperature\": msg.payload.t,\t    \"ec\": msg.payload.ec,\t    \"ph\": msg.payload.ph,\t    \"nitrogen\": msg.payload.n,\t    \"phosphorus\": msg.payload.p,\t    \"potassium\": msg.payload.k\t}",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 720,
+        "wires": [
+            [
+                "4ab3146d7d235f2c",
+                "b6167257f82fbcb9",
+                "a10b1d3daab0736a"
+            ]
+        ]
+    },
+    {
+        "id": "b6167257f82fbcb9",
+        "type": "influxdb out",
+        "z": "a10dbe8bb2c3f71f",
+        "influxdb": "3e75912bc0b60661",
+        "name": "",
+        "measurement": "soil-data",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "deno",
+        "bucket": "nodered",
+        "x": 1410,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "a10b1d3daab0736a",
+        "type": "influxdb out",
+        "z": "a10dbe8bb2c3f71f",
+        "influxdb": "f73d4a74b08d48e4",
+        "name": "",
+        "measurement": "soil_data",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 1480,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "a660256c14d50df1",
+        "type": "influxdb in",
+        "z": "a10dbe8bb2c3f71f",
+        "influxdb": "f73d4a74b08d48e4",
+        "name": "",
+        "query": "select * from soil_data order by time desc limit 1",
+        "rawOutput": true,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "deno",
+        "x": 650,
+        "y": 1120,
+        "wires": [
+            [
+                "172b3c8f740b9b32"
+            ]
+        ]
+    },
+    {
+        "id": "172b3c8f740b9b32",
+        "type": "function",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "function 11",
+        "func": "var data;\nif (msg.callback.content == 2) {\n    var tempenv = msg.payload.results[0].series[0].values[0][10];\n    var humd = msg.payload.results[0].series[0].values[0][2];\n    var soiltemp = msg.payload.results[0].series[0].values[0][9];\n    var soilmoisture = msg.payload.results[0].series[0].values[0][4];\n    var light = msg.payload.results[0].series[0].values[0][3];\n    var ec = msg.payload.results[0].series[0].values[0][1];\n    var ph = msg.payload.results[0].series[0].values[0][6];\n    var n = msg.payload.results[0].series[0].values[0][5];\n    var p = msg.payload.results[0].series[0].values[0][7];\n    var k = msg.payload.results[0].series[0].values[0][8];\n\n    data = \"Temperature Env: \" + tempenv.toFixed(2) + \" °C\\n\"\n        + \"Humidity: \" + humd.toFixed(2) + \" %\\n\"\n        + \"Soil Temperature: \" + soiltemp.toFixed(2) + \" °C\\n\"\n        + \"Soil Moisture: \" + soilmoisture + \" %\\n\"\n        + \"Light: \" + light.toFixed(2) + \" lx\\n\"\n        + \"Ec: \" + ec.toFixed(2) + \" uS/cm\\n\"\n        + \"Ph: \" + ph + \"\\n\"\n        + \"Nitrogen (N): \" + n.toFixed(2) + \"mg\\n\"\n        + \"Phosphorus (P): \" + p.toFixed(2) + \"mg\\n\"\n        + \"Potassium (K): \" + k.toFixed(2) + \"mg\";\n}\n\nmsg.error = false;\nmsg.payload.content = data;\nmsg.payload.chatId = msg.callback.chatId;\nmsg.payload.type = \"message\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 1120,
+        "wires": [
+            [
+                "a18237c9fda6db01"
+            ]
+        ]
+    },
+    {
+        "id": "a897cbc202c4aaf0",
+        "type": "debug",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 340,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "24763b5d7fb806e6",
+        "type": "debug",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 340,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "bd3b63574ec756a8",
+        "type": "ui_chart",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "group": "f7abd1b39e1d4eb0",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "label": "NPK",
+        "chartType": "pie",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#435fd0",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1730,
+        "y": 760,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bd942335b814c98a",
+        "type": "telegram sender",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "bot": "acd516fee320eb0b",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1030,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "41bea88ba02ae1b3",
+        "type": "trigger",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "op1": "1",
+        "op2": "{\"type\":\"message\",\"chatId\":\"193175889\",\"content\":\"High wind alert!\"}",
+        "op1type": "str",
+        "op2type": "json",
+        "duration": "250",
+        "extend": false,
+        "overrideDelay": false,
+        "units": "ms",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 840,
+        "y": 540,
+        "wires": [
+            [
+                "bd942335b814c98a"
+            ]
+        ]
+    },
+    {
+        "id": "992e876c41541f18",
+        "type": "blynk-iot-out-write",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "soil moisture",
+        "pin": "0",
+        "pinmode": 0,
+        "client": "68b9ad9ed1862f9f",
+        "x": 1130,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "e88f24a038bcfd6c",
+        "type": "blynk-iot-out-write",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "humidity",
+        "pin": "1",
+        "pinmode": 0,
+        "client": "68b9ad9ed1862f9f",
+        "x": 1120,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "3241dcad8c6b06c1",
+        "type": "http request",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "method": "GET",
+        "ret": "bin",
+        "paytoqs": "ignore",
+        "url": "http://100.96.211.94:5000/soil",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 410,
+        "y": 1240,
+        "wires": [
+            [
+                "acb301da8cd8ff63",
+                "147010523b65f64e"
+            ]
+        ]
+    },
+    {
+        "id": "245bea50251c7f8e",
+        "type": "inject",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 220,
+        "y": 1240,
+        "wires": [
+            [
+                "3241dcad8c6b06c1"
+            ]
+        ]
+    },
+    {
+        "id": "59cc8b769744c91e",
+        "type": "function",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "function 12",
+        "func": "let newMsg = {};\nnewMsg.payload = {};\n\nlet fileName = \"/data/dashboard/soil.jpg\"\n\nnewMsg.payload.chatId = 193175889;\nnewMsg.payload.content = fileName;\nnewMsg.payload.type = \"photo\";\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 1320,
+        "wires": [
+            [
+                "95800c3969aab171"
+            ]
+        ]
+    },
+    {
+        "id": "95800c3969aab171",
+        "type": "telegram sender",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "bot": "acd516fee320eb0b",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 830,
+        "y": 1320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "acb301da8cd8ff63",
+        "type": "image",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "width": 160,
+        "data": "payload",
+        "dataType": "msg",
+        "thumbnail": false,
+        "active": true,
+        "pass": false,
+        "outputs": 0,
+        "x": 600,
+        "y": 1380,
+        "wires": []
+    },
+    {
+        "id": "147010523b65f64e",
+        "type": "file",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "filename": "/data/dashboard/soil.jpg",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 710,
+        "y": 1200,
+        "wires": [
+            [
+                "59cc8b769744c91e"
+            ]
+        ]
+    },
+    {
+        "id": "8103649de5647fd8",
+        "type": "telegram command",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "command": "/soil",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "acd516fee320eb0b",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 230,
+        "y": 1300,
+        "wires": [
+            [
+                "3241dcad8c6b06c1"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "b237bd44d8ba4aa0",
+        "type": "telegram command",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "command": "/weather",
+        "description": "",
+        "registercommand": false,
+        "language": "",
+        "scope": "default",
+        "bot": "acd516fee320eb0b",
+        "strict": false,
+        "hasresponse": true,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 2,
+        "x": 240,
+        "y": 1480,
+        "wires": [
+            [
+                "6a6dd2947fe68a34"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "6a6dd2947fe68a34",
+        "type": "http request",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "method": "GET",
+        "ret": "bin",
+        "paytoqs": "ignore",
+        "url": "http://100.96.211.94:5000/weather",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 430,
+        "y": 1480,
+        "wires": [
+            [
+                "a487b1cbd16d3d71",
+                "5ab8478e4bf72358"
+            ]
+        ]
+    },
+    {
+        "id": "a487b1cbd16d3d71",
+        "type": "file",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "filename": "/data/dashboard/weather.jpg",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 720,
+        "y": 1480,
+        "wires": [
+            [
+                "b5127702e7df5c78"
+            ]
+        ]
+    },
+    {
+        "id": "b5127702e7df5c78",
+        "type": "function",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "function 13",
+        "func": "let newMsg = {};\nnewMsg.payload = {};\n\nlet fileName = \"/data/dashboard/weather.jpg\"\n\nnewMsg.payload.chatId = 193175889;\nnewMsg.payload.content = fileName;\nnewMsg.payload.type = \"photo\";\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 1560,
+        "wires": [
+            [
+                "2ae998c8127a1d02"
+            ]
+        ]
+    },
+    {
+        "id": "2ae998c8127a1d02",
+        "type": "telegram sender",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "bot": "acd516fee320eb0b",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 890,
+        "y": 1560,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5ab8478e4bf72358",
+        "type": "image",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "",
+        "width": 160,
+        "data": "payload",
+        "dataType": "msg",
+        "thumbnail": false,
+        "active": true,
+        "pass": false,
+        "outputs": 0,
+        "x": 680,
+        "y": 1620,
+        "wires": []
+    },
+    {
+        "id": "2e2e0684c971bbbf",
+        "type": "ui_spacer",
+        "z": "a10dbe8bb2c3f71f",
+        "name": "spacer",
+        "group": "a9a68208d229d79f",
+        "order": 1,
+        "width": "5",
+        "height": "2"
+    },
+    {
+        "id": "1d8803cbe9a53e9d",
+        "type": "mqtt-broker",
+        "name": "Raspberry Pi MQTT Broker",
+        "broker": "test.mosquitto.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "9a0e0b4e3377d54d",
+        "type": "ui_group",
+        "name": "Group 2",
+        "tab": "b6f04236f392db12",
+        "order": 2,
+        "disp": false,
+        "width": "4",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "a30964689d06a627",
+        "type": "ui_group",
+        "name": "Group 1",
+        "tab": "b6f04236f392db12",
+        "order": 1,
+        "disp": false,
+        "width": "4",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "9bd9e1ba355eb927",
+        "type": "ui_group",
+        "name": "Group 5",
+        "tab": "b6f04236f392db12",
+        "order": 5,
+        "disp": false,
+        "width": "10",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "f73d4a74b08d48e4",
+        "type": "influxdb",
+        "hostname": "100.96.211.94",
+        "port": "8081",
+        "protocol": "http",
+        "database": "sensor_data",
+        "name": "",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "1.x",
+        "url": "http://localhost:8086",
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "acd516fee320eb0b",
+        "type": "telegram bot",
+        "botname": "denooo_bot",
+        "usernames": "",
+        "chatids": "",
+        "baseapiurl": "",
+        "updatemode": "polling",
+        "pollinterval": "300",
+        "usesocks": false,
+        "sockshost": "",
+        "socksprotocol": "socks5",
+        "socksport": "6667",
+        "socksusername": "anonymous",
+        "sockspassword": "",
+        "bothost": "",
+        "botpath": "",
+        "localbotport": "8443",
+        "publicbotport": "8443",
+        "privatekey": "",
+        "certificate": "",
+        "useselfsignedcertificate": false,
+        "sslterminated": false,
+        "verboselogging": false
+    },
+    {
+        "id": "352aa6064683df41",
+        "type": "ui_group",
+        "name": "Group 1",
+        "tab": "36e19a9655500666",
+        "order": 1,
+        "disp": false,
+        "width": "4",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "f7abd1b39e1d4eb0",
+        "type": "ui_group",
+        "name": "Group 3",
+        "tab": "36e19a9655500666",
+        "order": 3,
+        "disp": false,
+        "width": "4",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "53ca7c7ee9429335",
+        "type": "ui_group",
+        "name": "Group 4",
+        "tab": "36e19a9655500666",
+        "order": 4,
+        "disp": false,
+        "width": "8",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "d0c919956a6745b6",
+        "type": "ui_group",
+        "name": "Group 2",
+        "tab": "36e19a9655500666",
+        "order": 2,
+        "disp": false,
+        "width": "8",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "3e75912bc0b60661",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "database",
+        "name": "influxDB-2",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "https://influxdb.denoodev.com/",
+        "rejectUnauthorized": false
+    },
+    {
+        "id": "68b9ad9ed1862f9f",
+        "type": "blynk-iot-client",
+        "name": "",
+        "path": "blynk.cloud",
+        "key": "Hzrpg0iqszuSxQ95vNyf9vlz803NcbMx",
+        "tmpl": "TMPL6g4A5sorH",
+        "dbg_all": true,
+        "dbg_log": false,
+        "dbg_prop": false,
+        "dbg_sync": false,
+        "dbg_low": false,
+        "dbg_pins": "",
+        "multi_cmd": false,
+        "enabled": true
+    },
+    {
+        "id": "b6f04236f392db12",
+        "type": "ui_tab",
+        "name": "Weather Station",
+        "icon": "wi-wu-sunny",
+        "order": 2,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "36e19a9655500666",
+        "type": "ui_tab",
+        "name": "Soil ",
+        "icon": "fa-solid fa-leaf",
+        "order": 2,
+        "disabled": false,
+        "hidden": false
+    }
+]
